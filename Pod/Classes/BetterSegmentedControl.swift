@@ -11,10 +11,12 @@ import Foundation
     private class IndicatorView: UIView {
         // MARK: Properties
         fileprivate let segmentMaskView = UIView()
+        fileprivate let underline = UIView()
         fileprivate var cornerRadius: CGFloat = 0 {
             didSet {
                 layer.cornerRadius = cornerRadius
                 segmentMaskView.layer.cornerRadius = cornerRadius
+                underline.layer.cornerRadius = cornerRadius
             }
         }
         override open var frame: CGRect {
@@ -35,6 +37,15 @@ import Foundation
         private func finishInit() {
             layer.masksToBounds = true
             segmentMaskView.backgroundColor = .black
+            underline.backgroundColor = .clear
+            addSubview(underline)
+        }
+        
+        override func layoutSubviews() {
+            super.layoutSubviews()
+            var underlineFrame = self.underline.frame
+            underlineFrame.origin = CGPoint(x: (self.bounds.width - underlineFrame.width) / 2, y: self.bounds.height - underlineFrame.height)
+            underline.frame = underlineFrame
         }
     }
     
@@ -96,6 +107,10 @@ import Foundation
                     cornerRadius = value
                 case let .bouncesOnChange(value):
                     bouncesOnChange = value
+                case .indicatorViewUnderlineColor(let color):
+                    indicatorViewUnderlineColor = color
+                case .indicatorViewUnderlineSize(let size):
+                    indicatorViewUnderlineSize = size
                 }
             }
         }
@@ -115,7 +130,7 @@ import Foundation
         }
         set {
             layer.cornerRadius = newValue
-            indicatorView.cornerRadius = newValue - indicatorViewInset
+            indicatorView.cornerRadius = newValue
             segmentViews.forEach { $0.layer.cornerRadius = indicatorView.cornerRadius }
         }
     }
@@ -151,6 +166,28 @@ import Foundation
         }
         set {
             indicatorView.layer.borderColor = newValue?.cgColor
+        }
+    }
+    
+    /// The indicator view's underline width
+    @IBInspectable public var indicatorViewUnderlineSize: CGSize {
+        get {
+            return indicatorView.underline.bounds.size
+        }
+        set {
+            var frame = indicatorView.underline.frame
+            frame.size = newValue
+            indicatorView.underline.frame = frame
+        }
+    }
+    
+    /// The indicator view's border color
+    @IBInspectable public var indicatorViewUnderlineColor: UIColor? {
+        get {
+            return indicatorView.underline.backgroundColor
+        }
+        set {
+            indicatorView.underline.backgroundColor = newValue
         }
     }
     
